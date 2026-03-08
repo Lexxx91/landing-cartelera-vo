@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOSE — ¿Vamos al cine o qué?</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Syne:wght@400;700;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{overflow-x:hidden;scroll-behavior:smooth}
+body{background:#0a0a0a;color:#fff;font-family:'Syne',sans-serif;overflow-x:hidden;cursor:crosshair}
+::selection{background:#ff3b3b;color:#000}
+
+/* ===== NOISE ===== */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:10000;
+}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#0a0a0a}
+::-webkit-scrollbar-thumb{background:#ff3b3b;border-radius:0}
+
+/* ===== KEYFRAMES ===== */
+@keyframes glitch{
+  0%,100%{transform:translate(0)}
+  20%{transform:translate(-3px,3px)}
+  40%{transform:translate(3px,-3px)}
+  60%{transform:translate(-2px,-2px)}
+  80%{transform:translate(2px,2px)}
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(80px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes rotateIn{from{opacity:0;transform:rotate(-10deg) scale(0.8)}to{opacity:1;transform:rotate(0) scale(1)}}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-15px) rotate(1deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+@keyframes stampBoom{0%{transform:scale(4) rotate(-20deg);opacity:0}50%{transform:scale(0.9) rotate(-8deg);opacity:1}70%{transform:scale(1.1) rotate(-8deg)}100%{transform:scale(1) rotate(-8deg)}}
+@keyframes cardSwipeRight{0%{transform:translateX(0) rotate(0);opacity:1}100%{transform:translateX(350px) rotate(25deg);opacity:0}}
+@keyframes cardSwipeLeft{0%{transform:translateX(0) rotate(0);opacity:1}100%{transform:translateX(-350px) rotate(-25deg);opacity:0}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes bounceIn{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+@keyframes confetti1{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(200px) rotate(720deg);opacity:0}}
+@keyframes confetti2{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(250px) rotate(-540deg);opacity:0}}
+@keyframes waveHand{0%,100%{transform:rotate(0)}25%{transform:rotate(20deg)}75%{transform:rotate(-20deg)}}
+
+.reveal{opacity:0;transform:translateY(50px);transition:all 1s cubic-bezier(0.16,1,0.3,1)}
+.reveal.vis{opacity:1;transform:translateY(0)}
+
+/* ===== TOPBAR ===== */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:999;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1rem 2rem;
+  background:rgba(10,10,10,0.85);backdrop-filter:blur(20px);
+  border-bottom:2px solid #ff3b3b;
+}
+.topbar-logo{font-family:'Archivo Black',sans-serif;font-size:1.4rem;letter-spacing:0.1em}
+.topbar-logo span{color:#ff3b3b}
+.topbar-cta{
+  font-family:'Archivo Black',sans-serif;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;
+  padding:0.6rem 1.5rem;background:#ff3b3b;color:#000;border:none;cursor:pointer;
+  transition:all 0.3s;text-decoration:none;
+}
+.topbar-cta:hover{background:#fff;transform:scale(1.05)}
+
+/* ===== HERO ===== */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;padding:6rem 1.5rem 3rem;position:relative;overflow:hidden;
+}
+
+.hero-bg{
+  position:absolute;inset:0;overflow:hidden;pointer-events:none;
+}
+.hero-bg .circle{
+  position:absolute;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,59,59,0.15),transparent 70%);
+}
+.hero-bg .c1{width:600px;height:600px;top:-200px;right:-200px;animation:float 8s ease infinite}
+.hero-bg .c2{width:400px;height:400px;bottom:-100px;left:-100px;animation:float 10s ease infinite reverse}
+
+.hero-pre{
+  font-size:0.7rem;letter-spacing:6px;text-transform:uppercase;color:#ff3b3b;
+  margin-bottom:1.5rem;
+  opacity:0;animation:slideDown 0.8s ease 0.3s forwards;
+}
+
+.hero-title{
+  font-family:'Archivo Black',sans-serif;
+  font-size:clamp(4rem,15vw,12rem);line-height:0.9;letter-spacing:-0.02em;
+  position:relative;
+  opacity:0;animation:slideUp 1s ease 0.5s forwards;
+}
+.hero-title .red{color:#ff3b3b}
+.hero-title .outline{
+  -webkit-text-stroke:2px #fff;color:transparent;
+}
+
+.hero-sub{
+  font-family:'Caveat',cursive;font-size:clamp(1.3rem,3.5vw,2.2rem);
+  color:#ff3b3b;margin-top:1rem;
+  transform:rotate(-2deg);
+  opacity:0;animation:rotateIn 0.8s ease 1s forwards;
+}
+
+.hero-desc{
+  font-size:0.8rem;color:#666;max-width:450px;line-height:1.8;margin-top:2rem;
+  opacity:0;animation:fadeIn 1s ease 1.3s forwards;
+}
+
+.hero-arrow{
+  margin-top:3rem;font-size:1.5rem;
+  opacity:0;animation:fadeIn 1s ease 1.8s forwards;
+}
+.hero-arrow span{animation:float 2s ease infinite;display:inline-block}
+
+/* ===== TICKER ===== */
+.ticker{
+  padding:0.8rem 0;border-top:2px solid #ff3b3b;border-bottom:2px solid #ff3b3b;
+  overflow:hidden;background:#ff3b3b;
+}
+.ticker-track{display:flex;white-space:nowrap;animation:marquee 20s linear infinite;width:max-content}
+.ticker-item{
+  font-family:'Archivo Black',sans-serif;font-size:0.8rem;letter-spacing:0.15em;
+  color:#000;padding:0 2rem;text-transform:uppercase;
+}
+
+/* ===== PROBLEM SECTION ===== */
+.problem{
+  padding:8rem 2rem;max-width:900px;margin:0 auto;position:relative;
+}
+
+.chat-bubble{
+  max-width:340px;padding:1rem 1.4rem;border-radius:18px;
+  font-size:0.85rem;line-height:1.6;margin-bottom:1rem;
+  position:relative;
+}
+.chat-bubble.left{
+  background:#1a1a1a;border:1px solid #222;border-bottom-left-radius:4px;
+  margin-right:auto;
+}
+.chat-bubble.right{
+  background:#ff3b3b;color:#000;font-weight:700;border-bottom-right-radius:4px;
+  margin-left:auto;
+}
+.chat-bubble .time{
+  font-size:0.5rem;color:#555;margin-top:0.4rem;display:block;
+}
+.chat-bubble.right .time{color:rgba(0,0,0,0.4)}
+
+.chat-dead{
+  text-align:center;padding:2rem;
+}
+.chat-dead-text{
+  font-family:'Archivo Black',sans-serif;font-size:clamp(1.5rem,4vw,2.5rem);
+  line-height:1.2;
+}
+.chat-dead-text .red{color:#ff3b3b}
+.chat-dead-sub{
+  font-family:'Caveat',cursive;font-size:1.3rem;color:#ff3b3b;
+  margin-top:0.5rem;transform:rotate(-1deg);
+}
+
+/* ===== SWIPE SECTION ===== */
+.swipe-section{
+  padding:6rem 2rem;text-align:center;position:relative;overflow:hidden;
+}
+
+.section-label{
+  font-family:'Archivo Black',sans-serif;font-size:0.6rem;letter-spacing:8px;
+  text-transform:uppercase;color:#ff3b3b;margin-bottom:1rem;
+}
+
+.section-title{
+  font-family:'Archivo Black',sans-serif;
+  font-size:clamp(1.8rem,5vw,3.5rem);line-height:1.1;
+  margin-bottom:0.5rem;
+}
+.section-title .red{color:#ff3b3b}
+.section-title .caveat{font-family:'Caveat',cursive;color:#ff3b3b;font-weight:700}
+
+.section-sub{
+  font-size:0.75rem;color:#666;max-width:420px;margin:0 auto 3rem;line-height:1.7;
+}
+
+/* Interactive swipe cards */
+.swipe-stage{
+  position:relative;width:300px;height:420px;margin:0 auto;perspective:800px;
+  user-select:none;-webkit-user-select:none;
+}
+
+.swipe-card{
+  position:absolute;width:280px;height:400px;
+  border-radius:16px;overflow:hidden;cursor:grab;
+  transition:box-shadow 0.3s;
+  display:flex;flex-direction:column;
+  border:1px solid rgba(255,255,255,0.08);
+}
+.swipe-card:active{cursor:grabbing}
+
+.swipe-card .poster{
+  flex:1;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:1.2rem;
+}
+
+.swipe-card .poster-bg{
+  position:absolute;inset:0;
+}
+
+.swipe-card .poster-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.3) 40%,transparent 60%);
+}
+
+.swipe-card .poster-content{position:relative;z-index:2;text-align:left}
+.swipe-card .poster-content .movie-title{
+  font-family:'Archivo Black',sans-serif;font-size:1.1rem;line-height:1.1;margin-bottom:0.3rem;
+}
+.swipe-card .poster-content .movie-meta{font-size:0.55rem;color:#999}
+.swipe-card .poster-content .movie-score{
+  display:flex;gap:0.5rem;margin-top:0.3rem;font-size:0.5rem;
+}
+.swipe-card .poster-content .movie-score span{color:#ff3b3b}
+
+.swipe-card .trailer-btn{
+  display:inline-flex;align-items:center;gap:0.3rem;
+  font-size:0.55rem;color:#fff;background:rgba(255,255,255,0.1);
+  padding:0.3rem 0.7rem;border-radius:6px;margin-top:0.5rem;
+  border:1px solid rgba(255,255,255,0.15);
+}
+
+.card-1 .poster-bg{background:linear-gradient(135deg,#1a0a2e,#4a1942,#2d1b69)}
+.card-2 .poster-bg{background:linear-gradient(135deg,#0d1f12,#1a3a2a,#2d5a3a)}
+.card-3 .poster-bg{background:linear-gradient(135deg,#2c1810,#6b3020,#4a2520)}
+.card-4 .poster-bg{background:linear-gradient(135deg,#0a1628,#1a3050,#0d2040)}
+.card-5 .poster-bg{background:linear-gradient(135deg,#28200a,#5a4a10,#3a3008)}
+
+/* Stamp overlays */
+.stamp{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Archivo Black',sans-serif;font-size:3rem;letter-spacing:0.1em;
+  padding:0.3rem 1.5rem;border:4px solid;border-radius:4px;
+  z-index:20;pointer-events:none;opacity:0;
+  text-transform:uppercase;
+}
+.stamp.voy{color:#27ae60;border-color:#27ae60}
+.stamp.nah{color:#ff3b3b;border-color:#ff3b3b;transform:translate(-50%,-50%) rotate(12deg)}
+
+.swipe-btns{
+  display:flex;justify-content:center;gap:1.5rem;margin-top:1.5rem;
+}
+.swipe-btn{
+  width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;cursor:pointer;transition:all 0.2s;border:2px solid;background:transparent;
+}
+.swipe-btn:active{transform:scale(0.9)}
+.btn-nah{border-color:#ff3b3b;color:#ff3b3b}
+.btn-nah:hover{background:#ff3b3b;color:#000}
+.btn-voy{border-color:#27ae60;color:#27ae60}
+.btn-voy:hover{background:#27ae60;color:#000}
+.btn-undo{border-color:#555;color:#555;font-size:1rem}
+.btn-undo:hover{border-color:#fff;color:#fff}
+
+.swipe-hint{
+  font-family:'Caveat',cursive;font-size:1rem;color:#555;margin-top:1rem;
+}
+
+/* ===== MATCH SECTION ===== */
+.match-section{
+  padding:8rem 2rem;text-align:center;position:relative;overflow:hidden;
+}
+
+.match-demo{
+  position:relative;width:300px;height:300px;margin:2rem auto;
+}
+
+.match-card-left,.match-card-right{
+  position:absolute;width:140px;height:200px;border-radius:12px;
+  overflow:hidden;transition:all 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+.match-card-left{
+  top:50px;left:20px;transform:rotate(-8deg);
+  background:linear-gradient(135deg,#1a3a2a,#2d5a3a);
+  border:1px solid rgba(39,174,96,0.3);
+}
+.match-card-right{
+  top:50px;right:20px;transform:rotate(8deg);
+  background:linear-gradient(135deg,#2c1810,#6b3020);
+  border:1px solid rgba(255,59,59,0.3);
+}
+.match-card-left.matched{
+  transform:rotate(-3deg) translateX(30px);
+  border-color:#ff3b3b;
+}
+.match-card-right.matched{
+  transform:rotate(3deg) translateX(-30px);
+  border-color:#ff3b3b;
+}
+
+.match-card-inner{
+  width:100%;height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:1rem;
+}
+.match-card-emoji{font-size:2.5rem;margin-bottom:0.5rem}
+.match-card-name{font-size:0.6rem;color:#999;margin-top:0.3rem}
+
+.match-explosion{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  opacity:0;transition:opacity 0.3s;pointer-events:none;
+}
+.match-explosion.show{opacity:1}
+.match-explosion .boom{
+  font-family:'Archivo Black',sans-serif;font-size:2rem;color:#ff3b3b;
+  animation:bounceIn 0.5s ease;
+}
+
+.confetti{position:absolute;width:8px;height:8px;border-radius:1px}
+.confetti.show{animation-fill-mode:forwards}
+.cf1{background:#ff3b3b;top:40%;left:45%;animation:confetti1 1s ease 0.1s forwards}
+.cf2{background:#27ae60;top:40%;left:55%;animation:confetti2 1.2s ease 0.15s forwards}
+.cf3{background:#ff3b3b;top:40%;left:50%;animation:confetti1 0.9s ease 0.2s forwards}
+.cf4{background:#fff;top:40%;left:48%;animation:confetti2 1.1s ease 0.1s forwards}
+.cf5{background:#ff3b3b;top:40%;left:52%;animation:confetti1 1.3s ease 0.25s forwards}
+.cf6{background:#27ae60;top:40%;left:43%;animation:confetti2 1s ease 0.18s forwards}
+
+/* ===== QUOTES ===== */
+.quotes{
+  padding:6rem 2rem;max-width:800px;margin:0 auto;
+}
+.quote-block{
+  padding:3rem 0;border-bottom:1px solid #1a1a1a;
+  display:grid;grid-template-columns:auto 1fr;gap:2rem;align-items:start;
+}
+.quote-num{
+  font-family:'Archivo Black',sans-serif;font-size:4rem;color:#ff3b3b;
+  opacity:0.2;line-height:0.8;
+}
+.quote-text{
+  font-family:'Archivo Black',sans-serif;
+  font-size:clamp(1.1rem,2.5vw,1.6rem);line-height:1.35;
+}
+.quote-text .red{color:#ff3b3b}
+.quote-text .dim{color:#444}
+.quote-sub{
+  font-family:'Caveat',cursive;font-size:1rem;color:#ff3b3b;
+  margin-top:0.5rem;transform:rotate(-1deg);display:inline-block;
+}
+
+/* ===== CODES ===== */
+.codes{
+  padding:6rem 2rem;text-align:center;
+}
+.code-grid{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:0.8rem;
+  max-width:600px;margin:2rem auto 0;
+}
+.code{
+  font-family:'Archivo Black',sans-serif;font-size:0.8rem;letter-spacing:2px;
+  padding:0.6rem 1.5rem;background:transparent;border:2px solid #ff3b3b;color:#ff3b3b;
+  cursor:default;transition:all 0.3s;position:relative;overflow:hidden;
+}
+.code::before{
+  content:'';position:absolute;inset:0;background:#ff3b3b;
+  transform:translateX(-101%);transition:transform 0.3s;
+}
+.code:hover::before{transform:translateX(0)}
+.code:hover{color:#000}
+.code span{position:relative;z-index:1}
+
+/* ===== CTA ===== */
+.final{
+  padding:10rem 2rem;text-align:center;position:relative;
+}
+.final::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,rgba(255,59,59,0.08),transparent 60%);
+  pointer-events:none;
+}
+
+.final-title{
+  font-family:'Archivo Black',sans-serif;
+  font-size:clamp(2rem,6vw,4.5rem);line-height:1;
+}
+.final-title .red{color:#ff3b3b}
+
+.final-sub{
+  font-family:'Caveat',cursive;font-size:clamp(1.2rem,3vw,1.8rem);
+  color:#ff3b3b;margin:1rem 0 3rem;transform:rotate(-1deg);
+}
+
+.cta-big{
+  display:inline-block;
+  font-family:'Archivo Black',sans-serif;font-size:clamp(1.2rem,3vw,1.8rem);
+  letter-spacing:0.1em;text-transform:uppercase;
+  padding:1.2rem 3.5rem;background:#ff3b3b;color:#000;
+  text-decoration:none;position:relative;overflow:hidden;
+  transition:all 0.3s;border:none;cursor:pointer;
+}
+.cta-big::after{
+  content:'';position:absolute;inset:0;background:#fff;
+  transform:translateY(101%);transition:transform 0.3s;
+}
+.cta-big:hover::after{transform:translateY(0)}
+.cta-big span{position:relative;z-index:1}
+.cta-big:hover{transform:translateY(-3px);box-shadow:0 20px 60px rgba(255,59,59,0.3)}
+
+.final-note{
+  font-size:0.6rem;color:#444;margin-top:1.5rem;letter-spacing:2px;
+}
+
+/* ===== FOOTER ===== */
+footer{
+  padding:2rem;text-align:center;border-top:2px solid #ff3b3b;
+}
+.footer-text{font-size:0.55rem;color:#444;letter-spacing:2px}
+.footer-text .red{color:#ff3b3b}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:700px){
+  .topbar{padding:0.8rem 1.2rem}
+  .hero{padding:5rem 1.2rem 2rem}
+  .quote-block{grid-template-columns:1fr;gap:0.5rem}
+  .quote-num{font-size:2.5rem}
+  .swipe-stage{width:260px;height:380px}
+  .swipe-card{width:240px;height:360px}
+  .chat-bubble{max-width:280px}
+  .match-demo{width:260px;height:260px}
+  .match-card-left,.match-card-right{width:110px;height:160px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <div class="topbar-logo">VO<span>S</span>E</div>
+  <a href="https://cartelera-vo.vercel.app/" class="topbar-cta">Abrir app</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+  </div>
+
+  <p class="hero-pre">Las Palmas de Gran Canaria</p>
+
+  <h1 class="hero-title">
+    <span class="outline">¿VAMOS</span><br>
+    AL <span class="red">CINE</span><br>
+    <span class="outline">O QUÉ?</span>
+  </h1>
+
+  <p class="hero-sub">— ¿qué hago, mi niño? Me lo cargo al hombro —</p>
+
+  <p class="hero-desc">
+    Desliza pelis en VO. Haz match con tu gente. Ve al cine sin montar un ñamberío por WhatsApp. Hecha en Las Palmas por cineros de aquí.
+  </p>
+
+  <div style="margin-top:1.5rem;display:inline-flex;align-items:center;gap:0.6rem;padding:0.5rem 1.4rem;border:1px solid #ff3b3b;font-family:'Archivo Black',sans-serif;font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;color:#ff3b3b;opacity:0;animation:fadeIn 1s ease 1.5s forwards">🔒 SOLO CON INVITACIÓN</div>
+
+  <div class="hero-arrow"><span>↓</span></div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item">SIN DOBLAJE ✦</span>
+    <span class="ticker-item">SWIPE → VOY ✦</span>
+    <span class="ticker-item">MATCH CON TU BRO ✦</span>
+    <span class="ticker-item">GOFIO42 ✦</span>
+    <span class="ticker-item">HECHA EN CANARIAS ✦</span>
+    <span class="ticker-item">6 PELIS QUE ERAN PELIS ✦</span>
+    <span class="ticker-item">ADIÓS WHATSAPP ✦</span>
+    <span class="ticker-item">ME LO CARGO AL HOMBRO ✦</span>
+    <span class="ticker-item">SIN DOBLAJE ✦</span>
+    <span class="ticker-item">SWIPE → VOY ✦</span>
+    <span class="ticker-item">MATCH CON TU BRO ✦</span>
+    <span class="ticker-item">GOFIO42 ✦</span>
+    <span class="ticker-item">HECHA EN CANARIAS ✦</span>
+    <span class="ticker-item">6 PELIS QUE ERAN PELIS ✦</span>
+    <span class="ticker-item">ADIÓS WHATSAPP ✦</span>
+    <span class="ticker-item">ME LO CARGO AL HOMBRO ✦</span>
+  </div>
+</div>
+
+<!-- PROBLEM: THE WHATSAPP NIGHTMARE -->
+<section class="problem reveal">
+  <div style="text-align:center;margin-bottom:3rem">
+    <div class="section-label">La realidad</div>
+    <h2 class="section-title">El grupo de WhatsApp<br><span class="red">un lunes cualquiera</span></h2>
+  </div>
+
+  <div style="text-align:center;margin-bottom:1.5rem;padding:0.5rem 1.2rem;background:#1a1a1a;border-radius:8px;display:inline-block;margin-left:50%;transform:translateX(-50%)">
+    <span style="font-size:0.65rem;color:#999">🎬 <strong style="color:#fff">Cineros de LPGC</strong> · 6 participantes</span>
+  </div>
+
+  <div class="chat-bubble left" style="animation-delay:0.2s">
+    Chacho ¿vamos al cine esta semana? 🎬
+    <span class="time">15:23</span>
+  </div>
+
+  <div class="chat-bubble left" style="margin-left:0;animation-delay:0.4s">
+    Yo me apunto pero solo si es en VO que la última vez me llevaron a ver una doblada y me dormí como un tronco
+    <span class="time">15:24</span>
+  </div>
+
+  <div class="chat-bubble left" style="animation-delay:0.6s">
+    Depende del día, ¿qué peli? Yo quiero ver esa nueva que sale la de Anora
+    <span class="time">15:31</span>
+  </div>
+
+  <div class="chat-bubble right" style="animation-delay:0.8s">
+    🐕 Mira lo que hizo el perro de mi prima jajajajaja
+    <span class="time">15:32</span>
+  </div>
+
+  <div class="chat-bubble left" style="animation-delay:1s">
+    JAJAJAJAJA fos chacho qué animal
+    <span class="time">15:32</span>
+  </div>
+
+  <div class="chat-bubble left" style="animation-delay:1.1s">
+    🎤 Audio (3:47) — sobre la ex de Guacimara
+    <span class="time">15:40</span>
+  </div>
+
+  <div class="chat-bubble left" style="animation-delay:1.2s">
+    Que alguien me diga los horarios del Monopol que la web no me carga
+    <span class="time">16:02</span>
+  </div>
+
+  <div class="chat-bubble left" style="animation-delay:1.3s">
+    Y en el Yelmo, ¿la ponen en VO o solo doblada?
+    <span class="time">16:15</span>
+  </div>
+
+  <div class="chat-bubble left" style="animation-delay:1.4s">
+    Echedey pero ¿lo del cine qué? ¿Vamos o qué hago, me lo cargo al hombro?
+    <span class="time">18:15</span>
+  </div>
+
+  <div style="text-align:center;color:#333;font-size:0.6rem;letter-spacing:2px;padding:1.5rem 0">
+    ─── ✦ 5 HORAS DESPUÉS ✦ ───
+  </div>
+
+  <div class="chat-bubble left" style="animation-delay:1.6s">
+    Yo sí quería ir 😢
+    <span class="time">23:11</span>
+  </div>
+
+  <div class="chat-bubble left" style="margin-left:0;animation-delay:1.7s">
+    Eran 6 colegas que querían ir al cine. Ninguno fue.
+    <span class="time">23:12</span>
+  </div>
+
+  <div class="chat-dead" style="margin-top:2rem">
+    <p class="chat-dead-text">La sesión de las 19:30<br>pasó hace <span class="red">4 horas</span>.</p>
+    <p class="chat-dead-sub">Esto no es país para cineros. O sí, pero con VOSE.</p>
+  </div>
+</section>
+
+<!-- SWIPE SECTION -->
+<section class="swipe-section reveal">
+  <div class="section-label">La solución</div>
+  <h2 class="section-title">Desliza como en Tinder<br><span class="red">pero sin sustos</span></h2>
+  <p class="section-sub">
+    Las pelis no te dejan en visto. No te mandan audios de 3 minutos.
+    No te dicen "yo ya la vi". Solo cartelera VO de Las Palmas. Swipe y listo.
+  </p>
+
+  <div class="swipe-stage" id="swipeStage">
+    <!-- Cards get injected by JS -->
+  </div>
+
+  <div class="swipe-btns">
+    <button class="swipe-btn btn-nah" id="btnNah" aria-label="No quiero">✕</button>
+    <button class="swipe-btn btn-undo" id="btnUndo" aria-label="Deshacer">↩</button>
+    <button class="swipe-btn btn-voy" id="btnVoy" aria-label="Voy">✓</button>
+  </div>
+
+  <p class="swipe-hint" id="swipeHint">← Arrastra o usa los botones →</p>
+</section>
+
+<!-- MATCH SECTION -->
+<section class="match-section reveal">
+  <div class="section-label">El momento mágico</div>
+  <h2 class="section-title">Tu bro también<br>deslizó a la derecha<span class="red">.</span></h2>
+  <p class="section-sub">
+    COINCIDENCIA. Los dos queréis ver la misma peli y no lo sabíais.
+    Es como cuando tu madre te dice "mira, Armiche también va p'allá".
+    Pero sin que tu madre se meta de por medio.
+  </p>
+
+  <div class="match-demo" id="matchDemo">
+    <div class="match-card-left" id="matchLeft">
+      <div class="match-card-inner">
+        <div class="match-card-emoji">🙋‍♂️</div>
+        <div style="font-family:'Archivo Black',sans-serif;font-size:0.7rem">TÚ</div>
+        <div class="match-card-name">quieres ver Anora</div>
+      </div>
+    </div>
+    <div class="match-card-right" id="matchRight">
+      <div class="match-card-inner">
+        <div class="match-card-emoji">🙋‍♀️</div>
+        <div style="font-family:'Archivo Black',sans-serif;font-size:0.7rem">YAIZA</div>
+        <div class="match-card-name">también quiere ver Anora</div>
+      </div>
+    </div>
+    <div class="match-explosion" id="matchExplosion">
+      <div class="boom">💥 MATCH</div>
+    </div>
+    <div class="confetti cf1" id="cf1"></div>
+    <div class="confetti cf2" id="cf2"></div>
+    <div class="confetti cf3" id="cf3"></div>
+    <div class="confetti cf4" id="cf4"></div>
+    <div class="confetti cf5" id="cf5"></div>
+    <div class="confetti cf6" id="cf6"></div>
+  </div>
+
+  <p class="swipe-hint" id="matchHint">Toca para ver el match →</p>
+</section>
+
+<!-- QUOTES / FEATURES -->
+<section class="quotes">
+  <div class="quote-block reveal">
+    <div class="quote-num">01</div>
+    <div>
+      <p class="quote-text">
+        Eran <span class="red">6 pelis que eran pelis</span>, y un chacho que era un chófer que conducía una guagua,
+        y ninguno sabía a qué cine ir.<br>
+        <span class="dim">VOSE lo hubiera resuelto en 3 toques.</span>
+      </p>
+      <span class="quote-sub">↑ los motoristas habrían ido al cine si tenían VOSE</span>
+    </div>
+  </div>
+
+  <div class="quote-block reveal">
+    <div class="quote-num">02</div>
+    <div>
+      <p class="quote-text">
+        <span class="red">Tráilers en VO</span> dentro de la app.
+        Sin salir a YouTube. Sin el anuncio de "duerme como EL GUAPO" que no puedes saltar.<br>
+        <span class="dim">Mejor doblaje que el de Sixtolo no te vamos a dar, pero el audio original sí.</span>
+      </p>
+      <span class="quote-sub">↑ Sixtolo habría aprobado esta app</span>
+    </div>
+  </div>
+
+  <div class="quote-block reveal">
+    <div class="quote-num">03</div>
+    <div>
+      <p class="quote-text">
+        <span class="red">Match → sesión → cine.</span>
+        ¿Y qué hago, mi niño, me lo cargo al hombro? No. Le das al botón y ya.<br>
+        <span class="dim">Menos logística que explicarle a un peninsular qué es una guagua.</span>
+      </p>
+      <span class="quote-sub">ni 47 audios ni ñ&@#$ que ñ&@#$</span>
+    </div>
+  </div>
+
+  <div class="quote-block reveal">
+    <div class="quote-num">04</div>
+    <div>
+      <p class="quote-text">
+        ¿Tu amigo tiene un amigo <span class="red">que también es cinero?</span>
+        VOSE os presenta. Tu grupo crece. Más gente. Más matches.<br>
+        <span class="dim">Salvar al soldado Armiche pero para ir al Yelmo.</span>
+      </p>
+      <span class="quote-sub">networking nivel Ayaki doblando a Kevin Costner</span>
+    </div>
+  </div>
+
+  <div class="quote-block reveal">
+    <div class="quote-num">05</div>
+    <div>
+      <p class="quote-text">
+        El diseño parece la portada de <span class="red">Cahiers du Cinéma.</span>
+        Fondo negro. Tipografías con peso. Tu móvil parece otro.<br>
+        <span class="dim">Más bonita que la plaza de Santa Ana un domingo por la mañana.</span>
+      </p>
+      <span class="quote-sub">la app más chula desde que Canarias tiene internet</span>
+    </div>
+  </div>
+</section>
+
+<!-- CODES -->
+<section class="codes reveal">
+  <div class="section-label">Invitaciones con ADN canario</div>
+  <h2 class="section-title" style="margin-bottom:0.5rem">Tu código no es <span class="red">"X7F2K9"</span></h2>
+  <p class="section-sub" style="margin-bottom:0">
+    Esto se hizo tomando un barraquito, no en un garaje de Palo Alto.
+  </p>
+  <div class="code-grid">
+    <div class="code"><span>GOFIO42</span></div>
+    <div class="code"><span>GUAGUA33</span></div>
+    <div class="code"><span>SANCOCHO77</span></div>
+    <div class="code"><span>PAPAS19</span></div>
+    <div class="code"><span>MILLO08</span></div>
+    <div class="code"><span>PERENQUÉN55</span></div>
+    <div class="code"><span>BAIFO23</span></div>
+    <div class="code"><span>JAREAS61</span></div>
+    <div class="code"><span>TUNERA99</span></div>
+    <div class="code"><span>POTAJE14</span></div>
+    <div class="code"><span>FRANGOLLO88</span></div>
+    <div class="code"><span>RELEQUE66</span></div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final reveal">
+  <h2 class="final-title">
+    DEJA EL<br>
+    <span class="red">WHATSAPP.</span><br>
+    ABRE VOSE.
+  </h2>
+  <p class="final-sub">— ¿y qué hago, mi niño? Le das al botón, bro —</p>
+
+  <a href="https://cartelera-vo.vercel.app/" class="cta-big">
+    <span>ABRIR VOSE →</span>
+  </a>
+
+  <p class="final-note">GRATIS · SOLO CON INVITACIÓN · 30 SEGUNDOS · SOLO CINE EN VO · HECHA EN LAS PALMAS</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p class="footer-text">HECHA CON <span class="red">♥</span> Y SUSPIROS DE MOYA EN LAS PALMAS · MEJOR DOBLAJE QUE SIXTOLO NO, PERO MEJOR APP SÍ · 2026</p>
+</footer>
+
+<script>
+// ===== SCROLL REVEAL =====
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('vis') });
+}, {threshold: 0.12});
+reveals.forEach(el => obs.observe(el));
+
+// ===== INTERACTIVE SWIPE CARDS =====
+const movies = [
+  {title:'Cumbres Borrascosas', meta:'2h 16m · Drama', sc:'3.1', tmdb:'3.2', color:'card-1', emoji:'🌪️'},
+  {title:'Hamnet', meta:'2h 6m · Drama', sc:'4.1', tmdb:'3.9', color:'card-2', emoji:'🎭'},
+  {title:'EPiC: Elvis Presley', meta:'1h 38m · Documental', sc:'3.0', tmdb:'4.1', color:'card-3', emoji:'🎸'},
+  {title:'Anora', meta:'2h 19m · Drama', sc:'4.2', tmdb:'4.0', color:'card-4', emoji:'💎'},
+  {title:'La novia!', meta:'1h 52m · Comedia', sc:'3.5', tmdb:'3.3', color:'card-5', emoji:'💀'},
+];
+
+const stage = document.getElementById('swipeStage');
+const hint = document.getElementById('swipeHint');
+let currentIndex = 0;
+let isDragging = false, startX = 0, currentX = 0;
+
+function renderCards() {
+  stage.innerHTML = '';
+  const remaining = movies.slice(currentIndex);
+  const toShow = remaining.slice(0, 3).reverse();
+
+  toShow.forEach((movie, i) => {
+    const realIndex = toShow.length - 1 - i;
+    const card = document.createElement('div');
+    card.className = `swipe-card ${movie.color}`;
+    card.style.zIndex = realIndex + 1;
+    card.style.transform = `translateY(${realIndex * -8}px) scale(${1 - realIndex * 0.04})`;
+
+    card.innerHTML = `
+      <div class="poster">
+        <div class="poster-bg"></div>
+        <div class="poster-overlay"></div>
+        <div class="poster-content">
+          <div style="font-size:3rem;margin-bottom:0.5rem;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5))">${movie.emoji}</div>
+          <div class="movie-title">${movie.title}</div>
+          <div class="movie-meta">${movie.meta}</div>
+          <div class="movie-score"><span>⭐ ${movie.sc}</span><span>⭐ ${movie.tmdb}</span></div>
+          <div class="trailer-btn">▶ Trailer VOSE</div>
+        </div>
+      </div>
+      <div class="stamp voy" style="display:none">VOY</div>
+      <div class="stamp nah" style="display:none">NAH</div>
+    `;
+
+    if (realIndex === 0) {
+      card.addEventListener('pointerdown', onPointerDown);
+      card.addEventListener('pointermove', onPointerMove);
+      card.addEventListener('pointerup', onPointerUp);
+      card.addEventListener('pointercancel', onPointerUp);
+    }
+
+    stage.appendChild(card);
+  });
+
+  if (remaining.length === 0) {
+    stage.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center">
+        <div style="font-size:4rem;margin-bottom:1rem">🍿</div>
+        <div style="font-family:'Archivo Black',sans-serif;font-size:1.2rem">Se acabaron las pelis</div>
+        <div style="font-size:0.7rem;color:#666;margin-top:0.5rem">Vuelve mañana, bro</div>
+      </div>
+    `;
+    hint.textContent = 'Eso es to... eso es to... eso es todo, chacho';
+  }
+}
+
+function getTopCard() {
+  const cards = stage.querySelectorAll('.swipe-card');
+  let top = null;
+  cards.forEach(c => {
+    if (!top || parseInt(c.style.zIndex) > parseInt(top.style.zIndex)) top = c;
+  });
+  return top;
+}
+
+function onPointerDown(e) {
+  isDragging = true;
+  startX = e.clientX;
+  this.setPointerCapture(e.pointerId);
+  this.style.transition = 'none';
+}
+
+function onPointerMove(e) {
+  if (!isDragging) return;
+  currentX = e.clientX - startX;
+  const rotation = currentX * 0.08;
+  this.style.transform = `translateX(${currentX}px) rotate(${rotation}deg)`;
+
+  const voyStamp = this.querySelector('.stamp.voy');
+  const nahStamp = this.querySelector('.stamp.nah');
+
+  if (currentX > 50) {
+    voyStamp.style.display = 'block';
+    voyStamp.style.opacity = Math.min((currentX - 50) / 80, 1);
+    nahStamp.style.display = 'none';
+  } else if (currentX < -50) {
+    nahStamp.style.display = 'block';
+    nahStamp.style.opacity = Math.min((-currentX - 50) / 80, 1);
+    voyStamp.style.display = 'none';
+  } else {
+    voyStamp.style.display = 'none';
+    nahStamp.style.display = 'none';
+  }
+}
+
+function onPointerUp(e) {
+  if (!isDragging) return;
+  isDragging = false;
+
+  if (currentX > 100) {
+    swipeCard('right');
+  } else if (currentX < -100) {
+    swipeCard('left');
+  } else {
+    this.style.transition = 'transform 0.4s cubic-bezier(0.16,1,0.3,1)';
+    this.style.transform = 'translateX(0) rotate(0)';
+    this.querySelector('.stamp.voy').style.display = 'none';
+    this.querySelector('.stamp.nah').style.display = 'none';
+  }
+  currentX = 0;
+}
+
+function swipeCard(dir) {
+  const card = getTopCard();
+  if (!card) return;
+
+  card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+  if (dir === 'right') {
+    card.style.transform = 'translateX(400px) rotate(30deg)';
+    card.querySelector('.stamp.voy').style.display = 'block';
+    card.querySelector('.stamp.voy').style.opacity = '1';
+  } else {
+    card.style.transform = 'translateX(-400px) rotate(-30deg)';
+    card.querySelector('.stamp.nah').style.display = 'block';
+    card.querySelector('.stamp.nah').style.opacity = '1';
+  }
+  card.style.opacity = '0';
+
+  const funPhrases = [
+    'Esa peli ni con gofio se traga',
+    '¡VOY! A ver si tu bro también',
+    'NAH, esa tiene pinta de siesta en butaca',
+    'Fos, ¡qué pelazo tiene esa peli!',
+    'Ni pa lante ni pa trás... ¡decide, chacho!',
+    'Esa ni regalada en el Monopol',
+    '¡Ños! Otra más pa la lista',
+  ];
+  hint.textContent = funPhrases[Math.floor(Math.random() * funPhrases.length)];
+
+  setTimeout(() => {
+    currentIndex++;
+    renderCards();
+  }, 500);
+}
+
+document.getElementById('btnVoy').addEventListener('click', () => swipeCard('right'));
+document.getElementById('btnNah').addEventListener('click', () => swipeCard('left'));
+document.getElementById('btnUndo').addEventListener('click', () => {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderCards();
+    hint.textContent = '↩ Segunda oportunidad, bro';
+  }
+});
+
+renderCards();
+
+// ===== MATCH ANIMATION =====
+let matchTriggered = false;
+const matchDemo = document.getElementById('matchDemo');
+
+matchDemo.addEventListener('click', () => {
+  if (matchTriggered) {
+    // Reset
+    document.getElementById('matchLeft').classList.remove('matched');
+    document.getElementById('matchRight').classList.remove('matched');
+    document.getElementById('matchExplosion').classList.remove('show');
+    document.querySelectorAll('.confetti').forEach(c => c.classList.remove('show'));
+    document.getElementById('matchHint').textContent = 'Toca para ver el match →';
+    matchTriggered = false;
+    return;
+  }
+
+  matchTriggered = true;
+  document.getElementById('matchLeft').classList.add('matched');
+  document.getElementById('matchRight').classList.add('matched');
+
+  setTimeout(() => {
+    document.getElementById('matchExplosion').classList.add('show');
+    document.querySelectorAll('.confetti').forEach(c => c.classList.add('show'));
+    document.getElementById('matchHint').textContent = '🔥 Al cine, bro. Toca para resetear.';
+  }, 600);
+});
+
+// Match auto-trigger on scroll
+const matchObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && !matchTriggered) {
+      setTimeout(() => matchDemo.click(), 800);
+    }
+  });
+}, {threshold: 0.5});
+matchObs.observe(matchDemo);
+</script>
+
+</body>
+</html>
