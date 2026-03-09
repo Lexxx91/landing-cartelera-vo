@@ -718,7 +718,7 @@ footer{
 <!-- FINAL CTA -->
 <section class="final reveal">
   <h2 class="final-title">
-    DEJA EL<br>
+    DEJA EL P*TO<br>
     <span class="red">WHATSAPP.</span><br>
     ABRE VOSE.
   </h2>
@@ -746,11 +746,11 @@ reveals.forEach(el => obs.observe(el));
 
 // ===== INTERACTIVE SWIPE CARDS =====
 const movies = [
-  {title:'Cumbres Borrascosas', meta:'2h 16m · Drama', sc:'3.1', tmdb:'3.2', color:'card-1', emoji:'🌪️'},
-  {title:'Hamnet', meta:'2h 6m · Drama', sc:'4.1', tmdb:'3.9', color:'card-2', emoji:'🎭'},
-  {title:'EPiC: Elvis Presley', meta:'1h 38m · Documental', sc:'3.0', tmdb:'4.1', color:'card-3', emoji:'🎸'},
-  {title:'Anora', meta:'2h 19m · Drama', sc:'4.2', tmdb:'4.0', color:'card-4', emoji:'💎'},
-  {title:'La novia!', meta:'1h 52m · Comedia', sc:'3.5', tmdb:'3.3', color:'card-5', emoji:'💀'},
+  {title:'Anaconda', meta:'2h 16m · Drama', sc:'3.1', tmdb:'3.2', color:'card-1', emoji:'🌪️'},
+  {title:'Jumanji', meta:'2h 6m · Drama', sc:'4.1', tmdb:'3.9', color:'card-2', emoji:'🎭'},
+  {title:'Star Wards', meta:'1h 38m · Documental', sc:'3.0', tmdb:'4.1', color:'card-3', emoji:'🎸'},
+  {title:'Fast and Furious 6', meta:'2h 19m · Drama', sc:'4.2', tmdb:'4.0', color:'card-4', emoji:'💎'},
+  {title:'Jurassic Park', meta:'1h 52m · Comedia', sc:'3.5', tmdb:'3.3', color:'card-5', emoji:'💀'},
 ];
 
 const stage = document.getElementById('swipeStage');
@@ -881,13 +881,13 @@ function swipeCard(dir) {
   card.style.opacity = '0';
 
   const funPhrases = [
-    'Esa peli ni con gofio se traga',
+    'Esa peli no baja ni con buche agua',
     '¡VOY! A ver si tu bro también',
-    'NAH, esa tiene pinta de siesta en butaca',
-    'Fos, ¡qué pelazo tiene esa peli!',
+    'NAH, esa tiene pinta de siesta',
+    'Fos, ¡qué angustia de peli!',
     'Ni pa lante ni pa trás... ¡decide, chacho!',
     'Esa ni regalada en el Monopol',
-    '¡Ños! Otra más pa la lista',
+    '¡Ñios! Otra más pa la lista',
   ];
   hint.textContent = funPhrases[Math.floor(Math.random() * funPhrases.length)];
 
